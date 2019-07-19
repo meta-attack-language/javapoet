@@ -50,11 +50,23 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
   /** The full class name like "java.util.Map.Entry". */
   final String canonicalName;
 
+  /** Indication that this class name should be force qualified. */
+  private boolean forceQualify;
+
   private ClassName(String packageName, ClassName enclosingClassName, String simpleName) {
-    this(packageName, enclosingClassName, simpleName, Collections.emptyList());
+    this(packageName, enclosingClassName, simpleName, false);
+  }
+
+  private ClassName(String packageName, ClassName enclosingClassName, String simpleName, boolean forceQualify) {
+    this(packageName, enclosingClassName, simpleName, forceQualify, Collections.emptyList());
   }
 
   private ClassName(String packageName, ClassName enclosingClassName, String simpleName,
+      List<AnnotationSpec> annotations) {
+    this(packageName, enclosingClassName, simpleName, false, annotations);
+  }
+
+  private ClassName(String packageName, ClassName enclosingClassName, String simpleName, boolean forceQualify,
       List<AnnotationSpec> annotations) {
     super(annotations);
     this.packageName = Objects.requireNonNull(packageName, "packageName == null");
@@ -63,10 +75,11 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
     this.canonicalName = enclosingClassName != null
         ? (enclosingClassName.canonicalName + '.' + simpleName)
         : (packageName.isEmpty() ? simpleName : packageName + '.' + simpleName);
+    this.forceQualify = forceQualify;
   }
 
   @Override public ClassName annotated(List<AnnotationSpec> annotations) {
-    return new ClassName(packageName, enclosingClassName, simpleName,
+    return new ClassName(packageName, enclosingClassName, simpleName, forceQualify,
         concatAnnotations(annotations));
   }
 
@@ -75,7 +88,7 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
     ClassName resultEnclosingClassName = enclosingClassName != null
         ? enclosingClassName.withoutAnnotations()
         : null;
-    return new ClassName(packageName, resultEnclosingClassName, simpleName);
+    return new ClassName(packageName, resultEnclosingClassName, simpleName, forceQualify);
   }
 
   @Override public boolean isAnnotated() {
@@ -157,6 +170,15 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
    * */
   public String canonicalName() {
     return canonicalName;
+  }
+
+  boolean forceQualify() {
+    return forceQualify;
+  }
+
+  public ClassName forceQualify(boolean forceQualify) {
+    this.forceQualify = forceQualify;
+    return this;
   }
 
   public static ClassName get(Class<?> clazz) {

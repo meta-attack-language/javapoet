@@ -360,6 +360,11 @@ final class CodeWriter {
    * names visible due to inheritance.
    */
   String lookupName(ClassName className) {
+    // If className indicates that it should be force quailfied, use the canonical name.
+    if (className.forceQualify()) {
+      return className.canonicalName();
+    }
+
     // If the top level simple name is masked by a current type variable, use the canonical name.
     String topLevelSimpleName = className.topLevelClassName().simpleName();
     if (currentTypeVariables.contains(topLevelSimpleName)) {

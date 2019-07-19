@@ -57,16 +57,24 @@ public final class ClassName extends TypeName implements Comparable<ClassName> {
     this(packageName, enclosingClassName, simpleName, false);
   }
 
-  private ClassName(String packageName, ClassName enclosingClassName, String simpleName, boolean forceQualify) {
+  private ClassName(
+      String packageName, ClassName enclosingClassName, String simpleName, boolean forceQualify) {
     this(packageName, enclosingClassName, simpleName, forceQualify, Collections.emptyList());
   }
 
-  private ClassName(String packageName, ClassName enclosingClassName, String simpleName,
+  private ClassName(
+      String packageName,
+      ClassName enclosingClassName,
+      String simpleName,
       List<AnnotationSpec> annotations) {
     this(packageName, enclosingClassName, simpleName, false, annotations);
   }
 
-  private ClassName(String packageName, ClassName enclosingClassName, String simpleName, boolean forceQualify,
+  private ClassName(
+      String packageName,
+      ClassName enclosingClassName,
+      String simpleName,
+      boolean forceQualify,
       List<AnnotationSpec> annotations) {
     super(annotations);
     this.packageName = Objects.requireNonNull(packageName, "packageName == null");

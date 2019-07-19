@@ -9,6 +9,11 @@
   <module name="FileLength"/>
   <module name="FileTabCharacter"/>
 
+  <!-- Exclude module-info.java -->
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern" value="module\-info\.java$"/>
+  </module>
+
   <!-- Trailing spaces -->
   <module name="RegexpSingleline">
     <property name="format" value="\s+$"/>
@@ -28,8 +33,6 @@
   </module>
 
   <module name="TreeWalker">
-    <property name="cacheFile" value="${checkstyle.cache.file}"/>
-
     <!-- Checks for Javadoc comments.                     -->
     <!-- See http://checkstyle.sf.net/config_javadoc.html -->
     <!--module name="JavadocMethod"/-->

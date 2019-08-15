@@ -200,7 +200,6 @@ public final class TypeSpec {
       } else {
         // Push an empty type (specifically without nested types) for type-resolution.
         codeWriter.pushType(new TypeSpec(this));
-
         codeWriter.emitJavadoc(javadoc);
         codeWriter.emitAnnotations(annotations, false);
         codeWriter.emitModifiers(modifiers, Util.union(implicitModifiers, kind.asMemberModifiers));
@@ -210,7 +209,6 @@ public final class TypeSpec {
           codeWriter.emit("$L $L", kind.name().toLowerCase(Locale.US), name);
         }
         codeWriter.emitTypeVariables(typeVariables);
-
         List<TypeName> extendsTypes;
         List<TypeName> implementsTypes;
         if (kind == Kind.INTERFACE) {
@@ -222,7 +220,6 @@ public final class TypeSpec {
               : Collections.singletonList(superclass);
           implementsTypes = superinterfaces;
         }
-
         if (!extendsTypes.isEmpty()) {
           codeWriter.emit(" extends");
           boolean firstType = true;
@@ -232,7 +229,6 @@ public final class TypeSpec {
             firstType = false;
           }
         }
-
         if (!implementsTypes.isEmpty()) {
           codeWriter.emit(" implements");
           boolean firstType = true;
@@ -242,15 +238,18 @@ public final class TypeSpec {
             firstType = false;
           }
         }
-
         codeWriter.popType();
-
         codeWriter.emit(" {\n");
       }
 
       codeWriter.pushType(this);
       codeWriter.indent();
       boolean firstMember = true;
+      if (kind == Kind.ENUM && enumConstants.entrySet().isEmpty()
+         && (!fieldSpecs.isEmpty() || !methodSpecs.isEmpty() || !typeSpecs.isEmpty())) {
+        firstMember = false;
+        codeWriter.emit(";\n");
+      }
       for (Iterator<Map.Entry<String, TypeSpec>> i = enumConstants.entrySet().iterator();
           i.hasNext(); ) {
         Map.Entry<String, TypeSpec> enumConstant = i.next();
@@ -273,7 +272,6 @@ public final class TypeSpec {
         fieldSpec.emit(codeWriter, kind.implicitFieldModifiers);
         firstMember = false;
       }
-
       if (!staticBlock.isEmpty()) {
         if (!firstMember) codeWriter.emit("\n");
         codeWriter.emit(staticBlock);
@@ -321,7 +319,6 @@ public final class TypeSpec {
       codeWriter.unindent();
       codeWriter.popType();
       codeWriter.popTypeVariables(typeVariables);
-
       codeWriter.emit("}");
       if (enumName == null && anonymousTypeArguments == null) {
         codeWriter.emit("\n"); // If this type isn't also a value, include a trailing newline.
@@ -617,9 +614,6 @@ public final class TypeSpec {
     }
 
     public TypeSpec build() {
-      checkArgument(kind != Kind.ENUM || !enumConstants.isEmpty(),
-          "at least one enum constant is required for %s", name);
-
       boolean isAbstract = modifiers.contains(Modifier.ABSTRACT) || kind != Kind.CLASS;
       for (MethodSpec methodSpec : methodSpecs) {
         checkArgument(isAbstract || !methodSpec.hasModifier(Modifier.ABSTRACT),

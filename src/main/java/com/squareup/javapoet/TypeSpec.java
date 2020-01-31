@@ -263,19 +263,21 @@ public final class TypeSpec {
       codeWriter.pushType(this);
       codeWriter.indent();
       boolean firstMember = true;
-      for (Iterator<Map.Entry<String, TypeSpec>> i = enumConstants.entrySet().iterator();
-          i.hasNext(); ) {
-        Map.Entry<String, TypeSpec> enumConstant = i.next();
-        if (!firstMember) codeWriter.emit("\n");
-        enumConstant.getValue().emit(codeWriter, enumConstant.getKey(), Collections.emptySet());
-        firstMember = false;
-        if (i.hasNext()) {
-          codeWriter.emit(",\n");
-        } else if (!fieldSpecs.isEmpty() || !methodSpecs.isEmpty() || !typeSpecs.isEmpty()) {
+      if (kind == Kind.ENUM) {
+        for (Iterator<Map.Entry<String, TypeSpec>> i = enumConstants.entrySet().iterator();
+            i.hasNext(); ) {
+          Map.Entry<String, TypeSpec> enumConstant = i.next();
+          if (!firstMember) codeWriter.emit("\n");
+          enumConstant.getValue().emit(codeWriter, enumConstant.getKey(), Collections.emptySet());
+          firstMember = false;
+          if (i.hasNext()) codeWriter.emit(",\n");
+        }
+        if (!fieldSpecs.isEmpty() || !methodSpecs.isEmpty() || !typeSpecs.isEmpty()) {
           codeWriter.emit(";\n");
-        } else {
+        } else if (!enumConstants.isEmpty()) {
           codeWriter.emit("\n");
         }
+        firstMember = false;
       }
 
       // Static fields.
@@ -762,9 +764,6 @@ public final class TypeSpec {
           checkArgument(modifier != null, "modifiers contain null");
         }
       }
-
-      checkArgument(kind != Kind.ENUM || !enumConstants.isEmpty(),
-          "at least one enum constant is required for %s", name);
 
       for (TypeName superinterface : superinterfaces) {
         checkArgument(superinterface != null, "superinterfaces contains null");

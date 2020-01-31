@@ -5,8 +5,8 @@
 # Adapted from https://coderwall.com/p/9b_lfq and
 # https://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/
 
-SLUG="square/javapoet"
-JDK="openjdk8"
+SLUG="mal-lang/javapoet"
+JDK="openjdk11"
 BRANCH="master"
 
 set -e
@@ -21,6 +21,13 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "Skipping snapshot deployment: wrong branch. Expected '$BRANCH' but was '$TRAVIS_BRANCH'."
 else
   echo "Deploying snapshot..."
-  mvn clean source:jar javadoc:jar deploy --settings=".buildscript/settings.xml" -Dmaven.test.skip=true
+  echo use-agent >> ~/.gnupg/gpg.conf
+  echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
+  echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
+  echo RELOADAGENT | gpg-connect-agent &> /dev/null
+  export GPG_TTY=$(tty)
+  echo $GPG_SECRET_KEYS | base64 --decode 2> /dev/null | $GPG_EXECUTABLE --import --no-tty --batch --yes &> /dev/null
+  echo $GPG_OWNERTRUST | base64 --decode 2> /dev/null | $GPG_EXECUTABLE --import-ownertrust --no-tty --batch --yes &> /dev/null
+  mvn clean deploy --settings=".buildscript/settings.xml" -Pdeploy -Dmaven.test.skip=true
   echo "Snapshot deployed!"
 fi

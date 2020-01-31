@@ -99,7 +99,7 @@ public class ParameterSpecTest {
     VariableElement parameterElement = element.getParameters().get(0);
 
     assertThat(ParameterSpec.get(parameterElement).toString())
-        .isEqualTo("@javax.annotation.Nullable java.lang.String arg0");
+        .isEqualTo("@javax.annotation.Nullable java.lang.String bar");
   }
 
   @Test public void addNonFinalModifier() {
